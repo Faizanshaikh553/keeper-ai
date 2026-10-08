@@ -1,0 +1,7 @@
+After copying the new Android files, delete this old package path if it still exists:
+
+android/app/src/main/kotlin/com/example/keeper/MainActivity.kt
+
+Keep this new path:
+
+android/app/src/main/kotlin/com/faizan/keeperai/MainActivity.kt

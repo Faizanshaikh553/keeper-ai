@@ -1,0 +1,138 @@
+{
+  "project_info": {
+    "project_number": "809938504753",
+    "project_id": "keeper-ai-4edcd",
+    "storage_bucket": "keeper-ai-4edcd.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:809938504753:android:23bac0128b2dbc1710d910",
+        "android_client_info": {
+          "package_name": "com.example.keeper"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "809938504753-794pl5tgb5rvqaf0k2b7esd8b9i4ufsk.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.keeper",
+            "certificate_hash": "54005b1e26d28df8708f11115c21c9ff0744a5d0"
+          }
+        },
+        {
+          "client_id": "809938504753-dl5evq9821if8adgbnsvvth8ti0src7h.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.keeper",
+            "certificate_hash": "7fcb16b8ffc50e2aa59c26b102c740d351a81b9d"
+          }
+        },
+        {
+          "client_id": "809938504753-n2rffk1q9kqqillqlh9elk1edk7meu7f.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA7rTEFFZucrc0zmv5_TU3RPHNUcmyXry0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "809938504753-n2rffk1q9kqqillqlh9elk1edk7meu7f.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "809938504753-u7i8ere9oeljleq2gf7nq35s7l60v9ck.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.keeper"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:809938504753:android:4c82dd56f01bcac310d910",
+        "android_client_info": {
+          "package_name": "com.faizan.keeperai"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "809938504753-3r17t7r4614ijdcpids45e11qj4iv01q.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.faizan.keeperai",
+            "certificate_hash": "49f1ae83f535bd4be461ae4a73bbf4e85845d0b2"
+          }
+        },
+        {
+          "client_id": "809938504753-kpashae9s5o6q0v1kur550tv8f2ljumf.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.faizan.keeperai",
+            "certificate_hash": "54005b1e26d28df8708f11115c21c9ff0744a5d0"
+          }
+        },
+        {
+          "client_id": "809938504753-kuja610uoptkio565s7ovn1dc2o32l85.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.faizan.keeperai",
+            "certificate_hash": "20a6d8c3d77220f7af8de26b2c35c2a79b5ed6bf"
+          }
+        },
+        {
+          "client_id": "809938504753-kv8sl67li7evpmrqmg043pf8ojdv3raq.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.faizan.keeperai",
+            "certificate_hash": "7fcb16b8ffc50e2aa59c26b102c740d351a81b9d"
+          }
+        },
+        {
+          "client_id": "809938504753-m04qhhqcmuns97hcril0otmluan9ck5d.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.faizan.keeperai",
+            "certificate_hash": "d12e3c91e300b2ddcc51e053d58eb4872b2a625b"
+          }
+        },
+        {
+          "client_id": "809938504753-n2rffk1q9kqqillqlh9elk1edk7meu7f.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA7rTEFFZucrc0zmv5_TU3RPHNUcmyXry0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "809938504753-n2rffk1q9kqqillqlh9elk1edk7meu7f.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "809938504753-u7i8ere9oeljleq2gf7nq35s7l60v9ck.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.keeper"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

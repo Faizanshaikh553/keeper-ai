@@ -1,0 +1,37 @@
+KEEPER AI — PERSONAL VAULT SHARE + PRINT UPDATE
+
+Replace only these files in the existing Keeper AI project:
+
+1) lib/screens/personal_vault_screen.dart
+2) lib/screens/vault_file_viewer_screen.dart
+3) lib/services/vault_file_action_service.dart   (NEW FILE)
+4) android/app/src/main/kotlin/com/faizan/keeperai/MainActivity.kt
+
+What changed:
+- Personal Vault file menu now has Share and Print.
+- Secure file viewer AppBar now has Share and Print buttons.
+- Share uses the existing share_plus native share sheet, so installed apps such as WhatsApp, Gmail, Email, Drive, etc. can appear according to the device.
+- Vault files are decrypted only temporarily for sharing/printing; the encrypted vault copy is never shared.
+- Android PrintManager was added through the existing Keeper method channel.
+- PDF files can be printed directly.
+- Images are converted to a printable A4 PDF.
+- TXT/CSV/Markdown/JSON files are converted to a printable A4 PDF.
+- Unsupported file types fail gracefully instead of crashing.
+- Temporary print files are deleted by the native print adapter when the print job finishes.
+- Existing Personal Vault encryption, lock, upload, search, rename and delete behavior is otherwise untouched.
+
+Important:
+- This update is intentionally limited to the Personal Vault share/print feature.
+- Do not replace other project files with unrelated versions.
+- The existing share_plus dependency is already present in the project.
+- After replacing the files, run:
+    flutter pub get
+    flutter analyze
+    flutter run
+
+Test:
+1. Open Personal Vault.
+2. Tap the three-dot menu on a file -> Share.
+3. Check the native Android share sheet and available apps.
+4. Open the file -> use the Share icon.
+5. Use Print on a PDF/image/text file and confirm Android print preview opens.

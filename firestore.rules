@@ -1,0 +1,248 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function isSelf(userId) {
+      return signedIn() && request.auth.uid == userId;
+    }
+
+    function organizationExists(organizationId) {
+      return exists(
+        /databases/$(database)/documents/organizations/$(organizationId)
+      );
+    }
+
+    function organizationData(organizationId) {
+      return get(
+        /databases/$(database)/documents/organizations/$(organizationId)
+      ).data;
+    }
+
+    function isOrganizationOwner(organizationId) {
+      return signedIn() &&
+        organizationExists(organizationId) &&
+        organizationData(organizationId).get('ownerId', '') == request.auth.uid;
+    }
+
+    function isOrganizationAdmin(organizationId) {
+      return isOrganizationOwner(organizationId) ||
+        (
+          signedIn() &&
+          organizationExists(organizationId) &&
+          request.auth.uid in organizationData(organizationId).get('adminIds', [])
+        );
+    }
+
+    function isOrganizationMember(organizationId) {
+      return isOrganizationAdmin(organizationId) ||
+        (
+          signedIn() &&
+          organizationExists(organizationId) &&
+          (
+            request.auth.uid in organizationData(organizationId).get('memberIds', []) ||
+            exists(
+              /databases/$(database)/documents/organizations/$(organizationId)/members/$(request.auth.uid)
+            )
+          )
+        );
+    }
+
+    function managerCanUpdateUser(userId) {
+      let currentUserData = get(
+        /databases/$(database)/documents/users/$(userId)
+      ).data;
+      let organizationId = currentUserData.get('organizationId', '');
+
+      return organizationId is string &&
+        organizationId.size() > 0 &&
+        isOrganizationAdmin(organizationId) &&
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+          'organizationId',
+          'organizationName',
+          'organizationRole',
+          'updatedAt'
+        ]);
+    }
+
+    function sharesOrganizationWithRequester(userId) {
+      let targetUserData = get(
+        /databases/$(database)/documents/users/$(userId)
+      ).data;
+      let organizationId = targetUserData.get('organizationId', '');
+
+      return organizationId is string &&
+        organizationId.size() > 0 &&
+        isOrganizationMember(organizationId);
+    }
+
+    match /users/{userId} {
+      allow read: if isSelf(userId) || sharesOrganizationWithRequester(userId);
+      allow create: if isSelf(userId) &&
+        request.resource.data.get('uid', userId) == userId;
+      allow update: if isSelf(userId) || managerCanUpdateUser(userId);
+      allow delete: if isSelf(userId);
+
+      match /keeper_chats/{chatId} {
+        allow read, create, update, delete: if isSelf(userId);
+      }
+
+      match /keeper_memories/{memoryId} {
+        allow read: if isSelf(userId);
+        allow create: if isSelf(userId) &&
+          request.resource.data.get('userId', '') == userId;
+        allow update, delete: if isSelf(userId);
+      }
+
+      match /ai_usage/{usageId} {
+        allow read, create, update: if isSelf(userId) &&
+          request.resource.data.get('userId', userId) == userId;
+        allow delete: if isSelf(userId);
+      }
+    }
+
+    match /organizations/{organizationId} {
+      // Signed-in users need to query an invite code before joining.
+      allow read: if signedIn();
+
+      allow create: if signedIn() &&
+        request.resource.data.get('ownerId', '') == request.auth.uid &&
+        request.auth.uid in request.resource.data.get('memberIds', []) &&
+        request.auth.uid in request.resource.data.get('adminIds', []);
+
+      allow update: if isOrganizationAdmin(organizationId) ||
+        (
+          signedIn() &&
+          !(request.auth.uid in resource.data.get('memberIds', [])) &&
+          request.auth.uid in request.resource.data.get('memberIds', []) &&
+          request.resource.data.get('currentMemberCount', 0) ==
+            resource.data.get('currentMemberCount', 0) + 1 &&
+          request.resource.data.get('currentMemberCount', 0) <=
+            resource.data.get('memberLimit', 0) &&
+          request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+            'memberIds',
+            'currentMemberCount',
+            'updatedAt'
+          ])
+        );
+
+      allow delete: if isOrganizationOwner(organizationId);
+
+      match /members/{memberId} {
+        allow read: if isOrganizationMember(organizationId) ||
+          isSelf(memberId);
+
+        allow create: if
+          (
+            isSelf(memberId) &&
+            request.resource.data.get('uid', '') == memberId &&
+            (
+              request.resource.data.get('role', '') == 'member' ||
+              (
+                request.resource.data.get('role', '') == 'owner' &&
+                getAfter(
+                  /databases/$(database)/documents/organizations/$(organizationId)
+                ).data.get('ownerId', '') == request.auth.uid
+              )
+            )
+          ) ||
+          isOrganizationAdmin(organizationId);
+
+        allow update, delete: if isOrganizationAdmin(organizationId) ||
+          isSelf(memberId);
+      }
+
+      match /departments/{departmentId} {
+        allow read: if isOrganizationMember(organizationId);
+        allow create, update, delete: if isOrganizationAdmin(organizationId);
+      }
+
+      match /keeper_memories/{memoryId} {
+        allow read: if isOrganizationMember(organizationId);
+        allow create: if isOrganizationMember(organizationId) &&
+          request.resource.data.get('userId', '') == request.auth.uid &&
+          request.resource.data.get('organizationId', '') == organizationId;
+        allow update, delete: if isOrganizationMember(organizationId);
+      }
+
+      match /group_messages/{messageId} {
+        allow read: if isOrganizationMember(organizationId);
+        allow create: if isOrganizationMember(organizationId) &&
+          request.resource.data.get('userId', '') == request.auth.uid &&
+          request.resource.data.get('organizationId', '') == organizationId &&
+          request.resource.data.get('text', '') is string &&
+          request.resource.data.get('text', '').size() > 0 &&
+          request.resource.data.get('text', '').size() <= 2000;
+        allow update: if false;
+        allow delete: if isOrganizationMember(organizationId) &&
+          resource.data.get('userId', '') == request.auth.uid;
+      }
+    }
+
+    // Users can submit moderation reports, but cannot read or alter them.
+    match /ai_content_reports/{reportId} {
+      allow create: if signedIn() &&
+        request.resource.data.userId == request.auth.uid &&
+        request.resource.data.reason is string &&
+        request.resource.data.answerPreview is string;
+      allow read, update, delete: if false;
+    }
+
+    match /group_message_reports/{reportId} {
+      allow create: if signedIn() &&
+        request.resource.data.reporterUserId == request.auth.uid &&
+        request.resource.data.organizationId is string &&
+        isOrganizationMember(request.resource.data.organizationId) &&
+        request.resource.data.reason is string;
+      allow read, update, delete: if false;
+    }
+
+    match /app_feedback/{feedbackId} {
+      allow create: if signedIn() &&
+        request.resource.data.userId == request.auth.uid &&
+        request.resource.data.message is string &&
+        request.resource.data.message.size() > 0 &&
+        request.resource.data.message.size() <= 5000;
+      allow read, update, delete: if false;
+    }
+
+    match /account_deletion_requests/{userId} {
+      allow create: if isSelf(userId) &&
+        request.resource.data.get('userId', '') == userId;
+      allow read: if isSelf(userId);
+      allow update: if isSelf(userId) &&
+        resource.data.get('status', '') == 'pending' &&
+        request.resource.data.get('status', '') == 'pending' &&
+        request.resource.data.get('userId', '') == userId &&
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+          'email',
+          'status',
+          'source',
+          'requestedAt',
+          'updatedAt'
+        ]);
+      allow delete: if false;
+    }
+
+    match /app_config/{documentId} {
+      allow read: if signedIn();
+      allow write: if false;
+    }
+
+    match /subscription_verification_requests/{requestId} {
+      allow create: if signedIn() &&
+        request.resource.data.get('userId', '') == request.auth.uid;
+      allow read: if signedIn() &&
+        resource.data.get('userId', '') == request.auth.uid;
+      allow update, delete: if false;
+    }
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
